@@ -16,12 +16,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: ColorsList.kDarkGreen),
         useMaterial3: true,
-        textTheme: TextTheme(
-          bodyLarge: TextStyle(fontFamily: 'Comfortaa'),
-          bodyMedium: TextStyle(fontFamily: 'Comfortaa'),
-          displayLarge: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
-          displayMedium: TextStyle(fontFamily: 'Montserrat'),
-        ),
+        // textTheme: TextTheme(
+        //   // bodyLarge: TextStyle(fontFamily: 'Comfortaa'),
+        //   // bodyMedium: TextStyle(fontFamily: 'Comfortaa'),
+        //   // displayLarge: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+        //   // displayMedium: TextStyle(fontFamily: 'Montserrat'),
+        // ),
       ),
       home: HomePage(),
       debugShowCheckedModeBanner: false,

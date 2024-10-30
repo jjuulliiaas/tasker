@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:tasker/theme/colors.dart';
 import 'package:tasker/theme/styled_text.dart';
 import 'package:tasker/widgets/top_container.dart';
+import 'package:tasker/widgets/search_bar.dart' as custom;
 
 class HomePage extends StatelessWidget {
-
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,9 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 color: ColorsList.kDarkGreen,
-                padding: const EdgeInsets.only(left: 30.0, top: 20.0))
+                padding: const EdgeInsets.only(left: 30.0, top: 20.0)),
+            SizedBox(height: 25),
+            custom.CustomSearchBar(),
           ],
         ),
       ),
