@@ -26,10 +26,11 @@ class CustomSearchBar extends StatelessWidget {
                 ],
               ),
               child: TextField(
+                style: TextStyle(fontSize: 11),
                 controller: _controller,
                 decoration: InputDecoration(
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 15.0), // Вирівнює текст
+                  contentPadding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 15.0),
                   suffixIcon: Icon(Icons.search, color: ColorsList.kDarkGreen),
                 ),
                 onChanged: (value) {

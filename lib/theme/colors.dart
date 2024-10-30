@@ -11,5 +11,6 @@ class ColorsList {
   static const Color kAppBackground = Color(0xFFF9F9F9);
   static const Color kAuthBackground = Color(0xFFCFD6E5);
   static const Color kGrey = Color(0xFFD9D9D9);
+  static const Color kRed = Color(0xFF1BC1417);
 
 }

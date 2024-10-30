@@ -22,6 +22,14 @@ class StyledText extends StatelessWidget {
     color: color,
   );
 
+  StyledText.accentLabel({required this.text, required Color color})
+      : style = TextStyle(
+    fontFamily: 'Montserrat',
+    fontSize: 12,
+    fontWeight: FontWeight.bold,
+    color: color,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Text(text, style: style);

@@ -3,6 +3,7 @@ import 'package:tasker/theme/colors.dart';
 import 'package:tasker/theme/styled_text.dart';
 import 'package:tasker/widgets/top_container.dart';
 import 'package:tasker/widgets/search_bar.dart' as custom;
+import '../widgets/task_list.dart';
 
 class HomePage extends StatelessWidget {
 
@@ -38,6 +39,8 @@ class HomePage extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 30.0, top: 20.0)),
             SizedBox(height: 25),
             custom.CustomSearchBar(),
+            SizedBox(height: 10),
+            Expanded(child: TaskList()),
           ],
         ),
       ),
