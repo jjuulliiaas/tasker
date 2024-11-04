@@ -56,9 +56,9 @@ class HomePage extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           CustomSliverAppBar(
-            expandedHeight: 200.0,
+            expandedHeight: 180.0,
             backgroundColor: ColorsList.kDarkGreen,
-            title: Text('My Tasks', style: TextStyle(color: Colors.white)),
+            title: StyledText.mainHeading(text: 'My Tasks', color: Colors.white),
             flexibleChild: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -72,25 +72,26 @@ class HomePage extends StatelessWidget {
                   iconSize: 50,
                   color: ColorsList.kAuthBackground,
                 ),
-                SizedBox(height: 20),
-                StyledText.defaultLabel(
-                  text: 'Date',
-                  color: ColorsList.kAppBackground,
-                ),
               ],
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(5.0),
               child: custom.CustomSearchBar(),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 5.0),
+              child: StyledText.accentLabel(text: 'Today, 1 December', color: Colors.black,)
             ),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                   child: TaskContainer(
                     title: tasks[index]['title']!,
                     time: tasks[index]['time']!,

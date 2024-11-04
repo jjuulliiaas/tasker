@@ -6,14 +6,17 @@ class StyledText extends StatelessWidget {
 
   StyledText({required this.text, required this.style});
 
+
+  // page titles:
   StyledText.mainHeading({required this.text, required Color color})
       : style = TextStyle(
     fontFamily: 'Montserrat',
-    fontSize: 25,
-    fontWeight: FontWeight.bold,
+    fontSize: 22,
+    fontWeight: FontWeight.w800,
     color: color,
   );
 
+  // default labels like date, e-mail, titles etc.:
   StyledText.defaultLabel({required this.text, required Color color})
       : style = TextStyle(
     fontFamily: 'Comfortaa',
@@ -22,6 +25,7 @@ class StyledText extends StatelessWidget {
     color: color,
   );
 
+  // accent labels:
   StyledText.accentLabel({required this.text, required Color color})
       : style = TextStyle(
     fontFamily: 'Montserrat',
