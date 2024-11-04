@@ -6,6 +6,7 @@ import '../widgets/task_container.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/custom_sliver_app_bar.dart';
 import '../screens/add_task.dart';
+import '../screens/account_settings.dart';
 
 class HomePage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -94,7 +95,10 @@ class HomePage extends StatelessWidget {
               leading: Icon(Icons.settings, color: ColorsList.kLightGreen,),
               title: StyledText.accentLabel(text: 'Settings', color: ColorsList.kDarkGreen,),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AccountSettings())
+                );
               },
             ),
           ],
