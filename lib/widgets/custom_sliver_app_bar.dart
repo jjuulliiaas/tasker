@@ -24,6 +24,7 @@ class CustomSliverAppBar extends StatelessWidget {
       expandedHeight: expandedHeight,
       pinned: pinned,
       floating: floating,
+      leading: Container(),
       flexibleSpace: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           double top = constraints.biggest.height;

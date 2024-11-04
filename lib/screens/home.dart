@@ -8,6 +8,7 @@ import '../widgets/custom_sliver_app_bar.dart';
 import '../screens/add_task.dart';
 
 class HomePage extends StatelessWidget {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<Map<String, String>> tasks = [
     {
       'title': 'Create design',
@@ -54,7 +55,52 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: ColorsList.kAppBackground,
+
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: ColorsList.kDarkGreen,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      radius: 40,),
+                    StyledText.mainHeading(text: 'Name', color: Colors.white,) ])
+            ),
+            // drawer elements:
+            ListTile(
+              leading: Icon(Icons.home, color: ColorsList.kLightGreen,),
+              title: StyledText.accentLabel(text: 'Home', color: ColorsList.kDarkGreen,),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.history, color: ColorsList.kLightGreen,),
+              title: StyledText.accentLabel(text: 'History', color: ColorsList.kDarkGreen,),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings, color: ColorsList.kLightGreen,),
+              title: StyledText.accentLabel(text: 'Settings', color: ColorsList.kDarkGreen,),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+
       body: CustomScrollView(
         slivers: [
           CustomSliverAppBar(
@@ -66,7 +112,7 @@ class HomePage extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: () {
-                    // TO DO actions
+                    _scaffoldKey.currentState?.openDrawer();
                   },
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
