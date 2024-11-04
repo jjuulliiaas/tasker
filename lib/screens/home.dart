@@ -4,6 +4,7 @@ import 'package:tasker/theme/colors.dart';
 import 'package:tasker/theme/styled_text.dart';
 import 'package:tasker/widgets/search_bar.dart' as custom;
 import '../widgets/task_container.dart';
+import '../widgets/bottom_nav_bar.dart';
 
 class HomePage extends StatelessWidget {
   final List<Map<String, String>> tasks = [
@@ -109,6 +110,20 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: CustomBottomNavigationBar(
+        onHomeTap: () {
+          // TO DO actions for home button
+        },
+        onHistoryTap: () {
+          // TO DO actions for history button
+        },
+        onAddTaskTap: () {
+          // TO DO actions for add task button
+        },
+        isHomeSelected: true,
+        isHistorySelected: false,
       ),
     );
   }

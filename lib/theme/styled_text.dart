@@ -11,7 +11,7 @@ class StyledText extends StatelessWidget {
   StyledText.mainHeading({required this.text, required Color color})
       : style = TextStyle(
     fontFamily: 'Montserrat',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: FontWeight.w800,
     color: color,
   );
