@@ -189,13 +189,58 @@ class _AddTaskPageState extends State<AddTaskPage> {
               ],
             ),
             ),
+            Padding(
+                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    TextField(
+                      maxLines: 3,
+                      maxLength: 300,
+                      onChanged: (value) {
+                        setState(() {
+                          title = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Decription',
+                        labelStyle: TextStyle(
+                          color: ColorsList.kDarkGreen,
+                          fontSize: 12,
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    MainButton(
+                        onPressed: () {
+                          // TO DO actions for marking task as VERY important
+                        },
+                        width: 34,
+                        height: 10,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(Icons.star, color: Colors.yellow,),
+                            StyledText.defaultLabel(text: 'High Importance', color: ColorsList.kDarkGreen)
+                          ],
+                        ),
+                        color: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8))
+                  ],
+                )),
             Spacer(),
             Center(
               child: MainButton
                 (onPressed: () {
                   // TO DO actions for creating task
               },
-                  width: 60,
+                  width: 40,
                   height: 10,
                   child: StyledText.accentLabel(text: 'Create Task', color: Colors.white),
                   color: ColorsList.kLightGreen,
