@@ -41,7 +41,7 @@ class TaskContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(15.0),
         ),
         elevation: 2,
-        margin: EdgeInsets.symmetric(vertical: 8.0),
+        margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -59,14 +59,14 @@ class TaskContainer extends StatelessWidget {
                     child: Text(
                       title,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 13.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(30.0),
@@ -75,7 +75,7 @@ class TaskContainer extends StatelessWidget {
                     child: Text(
                         time,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 9,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Montserrat',
                           color: ColorsList.kDarkGreen,
@@ -87,7 +87,7 @@ class TaskContainer extends StatelessWidget {
               Text(
                 description,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 9,
                   fontFamily: 'Comfortaa',
                   color: Colors.black,
                   height: 1.5,
