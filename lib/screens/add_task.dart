@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tasker/theme/colors.dart';
 import 'package:tasker/theme/styled_text.dart';
 import 'package:tasker/widgets/top_container.dart';
+import 'package:tasker/widgets/main_buttons.dart';
 
 class AddTaskPage extends StatefulWidget {
   @override
@@ -139,7 +140,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   ),
                 ]
               ),
-          ),
+            ),
             SizedBox(height: 20),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
@@ -189,25 +190,16 @@ class _AddTaskPageState extends State<AddTaskPage> {
             ),
             ),
             Spacer(),
-            // Create Task Button
             Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle create task action
-                  // Можна додати збереження нового завдання
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorsList.kDarkGreen,
-                  padding: EdgeInsets.symmetric(horizontal: 80, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: StyledText.accentLabel(
-                  text: "Create task",
-                  color: Colors.white,
-                ),
-              ),
+              child: MainButton
+                (onPressed: () {
+                  // TO DO actions for creating task
+              },
+                  width: 60,
+                  height: 10,
+                  child: StyledText.accentLabel(text: 'Create Task', color: Colors.white),
+                  color: ColorsList.kLightGreen,
+                  padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0))
             ),
             SizedBox(height: 20),
           ],
