@@ -71,7 +71,9 @@ class AccountSettings extends StatelessWidget {
                   ),
                 ],
               )),
-          SizedBox(height: 50,),
+          SizedBox(height: 30,),
+          StyledText.accentLabel(text: 'You can also delete your account', color: ColorsList.kDarkGreen,),
+          SizedBox(height: 30,),
           MainButton(
               width: 35,
               height: 10,
@@ -81,7 +83,7 @@ class AccountSettings extends StatelessWidget {
               onPressed: () {
                 _showAlertDialog(context);
               }
-              )
+              ),
         ],
       ),
     );
