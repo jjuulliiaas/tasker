@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasker/screens/calendar.dart';
 import 'package:tasker/theme/colors.dart';
 
 class CustomSearchBar extends StatelessWidget {
@@ -43,8 +44,9 @@ class CustomSearchBar extends StatelessWidget {
           SizedBox(width: 20),
           GestureDetector(
             onTap: () {
-              // TO DO:
-              //    - actions after clicking on calendar button
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CalendarPage()));
             },
             child: Container(
               height: 40.0,
