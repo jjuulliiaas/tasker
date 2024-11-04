@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:tasker/widgets/custom_sliver_app_bar.dart';
-import 'package:tasker/theme/colors.dart';
-import 'package:tasker/theme/styled_text.dart';
-import 'package:tasker/widgets/search_bar.dart' as custom;
+import '../theme/colors.dart';
+import '../theme/styled_text.dart';
+import '../widgets/search_bar.dart' as custom;
 import '../widgets/task_container.dart';
 import '../widgets/bottom_nav_bar.dart';
+import '../widgets/custom_sliver_app_bar.dart';
+import '../screens/add_task.dart';
 
 class HomePage extends StatelessWidget {
   final List<Map<String, String>> tasks = [
@@ -120,7 +121,10 @@ class HomePage extends StatelessWidget {
           // TO DO actions for history button
         },
         onAddTaskTap: () {
-          // TO DO actions for add task button
+          Navigator.push(
+              context,
+            MaterialPageRoute(builder: (context) => AddTaskPage())
+          );
         },
         isHomeSelected: true,
         isHistorySelected: false,
