@@ -89,7 +89,9 @@ class HomePage extends StatelessWidget {
               leading: Icon(Icons.history, color: ColorsList.kLightGreen,),
               title: StyledText.accentLabel(text: 'History', color: ColorsList.kDarkGreen,),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HistoryPage()));
               },
             ),
             ListTile(
