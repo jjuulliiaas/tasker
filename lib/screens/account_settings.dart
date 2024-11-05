@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tasker/screens/login.dart';
+import 'package:tasker/screens/signup.dart';
 import 'package:tasker/widgets/top_container.dart';
 import '../theme/colors.dart';
 import '../theme/styled_text.dart';
@@ -84,6 +86,50 @@ class AccountSettings extends StatelessWidget {
                 _showAlertDialog(context);
               }
               ),
+          SizedBox(height: 50,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              MainButton(
+                  width: 30,
+                  height: 10,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(Icons.login, size: 15, color: ColorsList.kDarkGreen),
+                      SizedBox(width: 5,),
+                      StyledText.defaultLabel(text: 'Log In', color: ColorsList.kDarkGreen)
+                    ],
+                  ),
+                  color: ColorsList.kAuthBackground,
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage())
+                    );
+                  }),
+              MainButton(
+                  width: 30,
+                  height: 10,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(Icons.add_reaction_rounded, size: 15, color: ColorsList.kDarkGreen),
+                      SizedBox(width: 5,),
+                      StyledText.defaultLabel(text: 'Sign Up', color: ColorsList.kDarkGreen)
+                    ],
+                  ),
+                  color: ColorsList.kAuthBackground,
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupPage())
+                    );
+                  })
+            ],
+          )
         ],
       ),
     );
