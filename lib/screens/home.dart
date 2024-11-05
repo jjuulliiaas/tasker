@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasker/screens/history.dart';
 import '../theme/colors.dart';
 import '../theme/styled_text.dart';
 import '../widgets/search_bar.dart' as custom;
@@ -168,7 +169,10 @@ class HomePage extends StatelessWidget {
           // TO DO actions for home button
         },
         onHistoryTap: () {
-          // TO DO actions for history button
+          Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HistoryPage())
+          );
         },
         onAddTaskTap: () {
           Navigator.push(

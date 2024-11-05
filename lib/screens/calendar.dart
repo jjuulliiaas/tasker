@@ -133,7 +133,7 @@ class _CalendarPageState extends State<CalendarPage> {
           SliverList(
             delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
-                // Replace this with your task items.
+                // TO DO replace this with my task items:
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                   child: Container(
@@ -145,7 +145,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   ),
                 );
               },
-              childCount: 5, // Set your number of task items here.
+              childCount: 5, // TO DO count
             ),
           ),
         ],
