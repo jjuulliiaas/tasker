@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                       color: Colors.black),
                   TextButton(
                       onPressed: () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (context) => SignupPage()));
                       },
