@@ -48,7 +48,10 @@ class _HistoryPageState extends State<HistoryPage> {
               leading: Icon(Icons.home, color: ColorsList.kLightGreen,),
               title: StyledText.accentLabel(text: 'Home', color: ColorsList.kDarkGreen,),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomePage())
+                );
               },
             ),
             ListTile(
