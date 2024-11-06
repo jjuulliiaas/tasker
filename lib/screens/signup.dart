@@ -44,6 +44,13 @@ class _SignupPageState extends State<SignupPage> {
     return null;
   }
 
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
