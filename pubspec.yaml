@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   sqflite: ^2.2.5
   path: ^1.8.3
+  path_provider: ^2.0.0
 
   cupertino_icons: ^1.0.8
 
@@ -36,7 +37,6 @@ flutter:
     - assets/fonts/Montserrat-Regular.ttf
     - assets/fonts/Montserrat-Bold.ttf
     - assets/images/logo.png
-    - assets/db/tasker.db
 
   fonts:
     - family: Comfortaa

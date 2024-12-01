@@ -1,23 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:tasker/screens/home.dart';
-import 'package:tasker/widgets/main_buttons.dart';
+import '../database/db_helper.dart';
 import '../theme/colors.dart';
 import '../theme/styled_text.dart';
-import '../widgets/bottom_nav_bar.dart';
-import '../widgets/custom_sliver_app_bar.dart';
 import '../widgets/search_bar.dart' as custom;
-import 'account_settings.dart';
-import 'add_task.dart';
+import '../widgets/bottom_nav_bar.dart';
+import '../widgets/main_buttons.dart';
+import '../widgets/custom_sliver_app_bar.dart';
+import '../screens/add_task.dart';
 
 class HistoryPage extends StatefulWidget {
+  final Map<String, dynamic> user; // Передаємо інформацію про користувача
+
+  HistoryPage({required this.user});
 
   @override
   State<HistoryPage> createState() => _HistoryPageState();
-
 }
 
 class _HistoryPageState extends State<HistoryPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _logOut() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage(userId: widget.user['user_id'])),
+          (route) => false,
+    );
+  }
+
+  void _deleteAccount() async {
+    try {
+      await DatabaseHelper.instance.deleteAccount(widget.user['user_id']);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Account deleted successfully!')),
+      );
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage(userId: widget.user['user_id'])),
+            (route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete account: $e')),
+      );
+    }
+  }
+
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Account'),
+          content: Text(
+              'Are you sure you want to delete your account? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteAccount();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   int selectedIndex = 0;
 
@@ -28,48 +84,40 @@ class _HistoryPageState extends State<HistoryPage> {
       backgroundColor: ColorsList.kAppBackground,
       drawer: Drawer(
         child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
+          children: [
             DrawerHeader(
-                decoration: BoxDecoration(
-                  color: ColorsList.kDarkGreen,
-                ),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.grey,
-                        radius: 40,),
-                      StyledText.mainHeading(text: 'Name', color: Colors.white,) ])
-            ),
-            // drawer elements:
-            ListTile(
-              leading: Icon(Icons.home, color: ColorsList.kLightGreen,),
-              title: StyledText.accentLabel(text: 'Home', color: ColorsList.kDarkGreen,),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage())
-                );
-              },
+              decoration: BoxDecoration(color: ColorsList.kDarkGreen),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.grey,
+                    radius: 40,
+                  ),
+                  SizedBox(height: 10),
+                  StyledText.mainHeading(
+                    text: widget.user['user_name'] ?? 'Unknown',
+                    color: Colors.white,
+                  ),
+                ],
+              ),
             ),
             ListTile(
-              leading: Icon(Icons.history, color: ColorsList.kLightGreen,),
-              title: StyledText.accentLabel(text: 'History', color: ColorsList.kDarkGreen,),
-              onTap: () {
-                Navigator.pop(context);
-              },
+              leading: Icon(Icons.logout, color: ColorsList.kDarkGreen),
+              title: StyledText.accentLabel(
+                text: 'Log Out',
+                color: ColorsList.kDarkGreen,
+              ),
+              onTap: _logOut,
             ),
+            Divider(),
             ListTile(
-              leading: Icon(Icons.settings, color: ColorsList.kLightGreen,),
-              title: StyledText.accentLabel(text: 'Settings', color: ColorsList.kDarkGreen,),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AccountSettings())
-                );
-              },
+              leading: Icon(Icons.delete, color: Colors.red),
+              title: StyledText.accentLabel(
+                text: 'Delete Account',
+                color: Colors.red,
+              ),
+              onTap: _showDeleteAccountDialog,
             ),
           ],
         ),
@@ -79,7 +127,10 @@ class _HistoryPageState extends State<HistoryPage> {
           CustomSliverAppBar(
             expandedHeight: 180.0,
             backgroundColor: ColorsList.kLightGreen,
-            title: StyledText.mainHeading(text: 'History', color: Colors.white),
+            title: StyledText.mainHeading(
+              text: 'History',
+              color: Colors.white,
+            ),
             flexibleChild: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -104,35 +155,37 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildFilterButton(0, 'All', ColorsList.kDarkGreen),
-                    _buildFilterButton(1, 'Done', Colors.green, Icons.circle),
-                    _buildFilterButton(2, 'Miss', Colors.red, Icons.circle),
-                    _buildFilterButton(3, 'Important', Colors.yellow, Icons.star),
-                  ],
-                )),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildFilterButton(0, 'All', ColorsList.kDarkGreen),
+                  _buildFilterButton(1, 'Done', Colors.green, Icons.circle),
+                  _buildFilterButton(2, 'Miss', Colors.red, Icons.circle),
+                  _buildFilterButton(3, 'Important', Colors.yellow, Icons.star),
+                ],
+              ),
+            ),
           ),
-
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: CustomBottomNavigationBar(
         onHomeTap: () {
           Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage())
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomePage(userId: widget.user['user_id']),
+            ),
           );
         },
         onHistoryTap: () {
-          //
+          // Already on history page
         },
         onAddTaskTap: () {
           Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddTaskPage())
+            context,
+            MaterialPageRoute(builder: (context) => AddTaskPage()),
           );
         },
         isHomeSelected: false,

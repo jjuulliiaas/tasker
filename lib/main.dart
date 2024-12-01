@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tasker/screens/home.dart';
+import 'package:tasker/screens/login.dart';
 import 'package:tasker/theme/colors.dart';
 
 void main() {
@@ -16,14 +16,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: ColorsList.kDarkGreen),
         useMaterial3: true,
-        // textTheme: TextTheme(
-        //   // bodyLarge: TextStyle(fontFamily: 'Comfortaa'),
-        //   // bodyMedium: TextStyle(fontFamily: 'Comfortaa'),
-        //   // displayLarge: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
-        //   // displayMedium: TextStyle(fontFamily: 'Montserrat'),
-        // ),
       ),
-      home: HomePage(),
+      home: LoginPage(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -1,7 +1,6 @@
-import 'dart:io';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:flutter/services.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 
@@ -18,60 +17,77 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDB() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'tasker.db');
+    final directory = await getApplicationDocumentsDirectory();
+    final path = join(directory.path, 'tasker.db');
+    print("Database path: $path");
 
-    // check on existing of database
-    final exists = await databaseExists(path);
-
-    if (!exists) {
-      // copying from assets if file is not here
-      try {
-        await Directory(dirname(path)).create(recursive: true);
-        ByteData data = await rootBundle.load('assets/db/tasker.db');
-        List<int> bytes =
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-        await File(path).writeAsBytes(bytes, flush: true);
-      } catch (e) {
-        print("Error with copying database: $e");
-      }
-    }
-
-    return await openDatabase(path);
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+    );
   }
 
-  Future<int> createTask(Map<String, dynamic> task) async {
-    final db = await instance.database;
-    return await db.insert('tasks', task);
+  Future<void> _createDB(Database db, int version) async {
+    print("Creating database...");
+
+    // Таблиця користувачів
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS users (
+        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_name TEXT NOT NULL,
+        user_email TEXT NOT NULL UNIQUE,
+        user_password TEXT NOT NULL
+      )
+    ''');
+
+    // Таблиця завдань
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS tasks (
+        task_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        task_title TEXT NOT NULL,
+        task_description TEXT,
+        task_due_date TEXT,
+        task_start_time TEXT,
+        task_end_time TEXT,
+        task_status_id INTEGER,
+        task_priority INTEGER,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+      )
+    ''');
+
+    // Таблиця статусів завдань
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS task_status (
+        status_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        status_name TEXT NOT NULL
+      )
+    ''');
+
+    print("Database created successfully.");
   }
 
-  Future<List<Map<String, dynamic>>> readAllTasks() async {
-    final db = await instance.database;
-    return await db.query('tasks');
-  }
-
-  Future close() async {
+  Future<void> close() async {
     final db = await instance.database;
     db.close();
   }
 
-
-
-
-  // sign up
+  // Реєстрація нового користувача
   Future<int> userSignUp(String name, String email, String password) async {
     final db = await instance.database;
 
+    // Перевірка наявності користувача
     final existingUser = await db.query(
       'users',
       where: 'user_email = ?',
       whereArgs: [email],
     );
     if (existingUser.isNotEmpty) {
-      throw Exception("This e-mail has already registered.");
+      throw Exception("This e-mail is already registered.");
     }
 
-    // hash password
+    // Хешуємо пароль
     final hashedPassword = sha256.convert(utf8.encode(password)).toString();
 
     final user = {
@@ -79,7 +95,80 @@ class DatabaseHelper {
       'user_email': email,
       'user_password': hashedPassword,
     };
+
     return await db.insert('users', user);
   }
+
+  // Авторизація користувача
+  Future<Map<String, dynamic>?> loginUser(String email, String password) async {
+    final db = await instance.database;
+
+    // Хешуємо пароль для порівняння
+    final hashedPassword = sha256.convert(utf8.encode(password)).toString();
+
+    final result = await db.query(
+      'users',
+      where: 'user_email = ? AND user_password = ?',
+      whereArgs: [email, hashedPassword],
+    );
+
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  // Додавання нового завдання
+  Future<int> createTask(Map<String, dynamic> task) async {
+    final db = await instance.database;
+    return await db.insert('tasks', task);
+  }
+
+  // Отримання всіх завдань для користувача
+  Future<List<Map<String, dynamic>>> readAllTasks(int userId) async {
+    final db = await instance.database;
+    return await db.query(
+      'tasks',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  // Діагностичні методи
+  Future<void> checkUsersTable() async {
+    final db = await instance.database;
+    final users = await db.rawQuery('SELECT * FROM users');
+    print("Users in database: $users");
+  }
+
+  Future<void> checkTasksTable() async {
+    final db = await instance.database;
+    final tasks = await db.rawQuery('SELECT * FROM tasks');
+    print("Tasks in database: $tasks");
+  }
+
+  Future<Map<String, dynamic>?> getUserById(int userId) async {
+    final db = await instance.database;
+
+    final result = await db.query(
+      'users',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+
+
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  Future<void> deleteAccount(int userId) async {
+    final db = await instance.database;
+
+    await db.delete(
+      'users',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+
+    print("User with ID $userId deleted from database.");
+  }
+
+
 
 }

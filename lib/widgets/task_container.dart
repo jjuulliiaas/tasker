@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tasker/theme/colors.dart';
-import 'package:tasker/theme/styled_text.dart';
 
 class TaskContainer extends StatelessWidget {
   final String title;
