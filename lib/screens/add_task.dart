@@ -6,21 +6,49 @@ import 'package:tasker/widgets/main_buttons.dart';
 import '../database/db_helper.dart';
 
 class AddTaskPage extends StatefulWidget {
-  final int userId; // Передаємо userId для зв’язку завдання з користувачем
+  final int userId;
+  final Map<String, dynamic>? task;
 
-  AddTaskPage({required this.userId});
+  AddTaskPage({required this.userId, this.task});
 
   @override
   _AddTaskPageState createState() => _AddTaskPageState();
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
-  String title = "";
-  String description = "";
-  DateTime selectedDate = DateTime.now();
-  TimeOfDay startTime = TimeOfDay(hour: 10, minute: 0);
-  TimeOfDay endTime = TimeOfDay(hour: 12, minute: 0);
-  bool isHighPriority = false;
+  late String title;
+  late String description;
+  late DateTime selectedDate;
+  late TimeOfDay startTime;
+  late TimeOfDay endTime;
+  late bool isHighPriority;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.task != null) {
+      // Initialize fields for editing
+      title = widget.task!['task_title'] ?? '';
+      description = widget.task!['task_description'] ?? '';
+      selectedDate = DateTime.parse(widget.task!['task_due_date']);
+      startTime = _parseTime(widget.task!['task_start_time']);
+      endTime = _parseTime(widget.task!['task_end_time']);
+      isHighPriority = widget.task!['task_priority'] == 1;
+    } else {
+      // Initialize fields for creating
+      title = '';
+      description = '';
+      selectedDate = DateTime.now();
+      startTime = TimeOfDay(hour: 10, minute: 0);
+      endTime = TimeOfDay(hour: 12, minute: 0);
+      isHighPriority = false;
+    }
+  }
+
+  TimeOfDay _parseTime(String time) {
+    final parts = time.split(':');
+    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -29,10 +57,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
       firstDate: DateTime(2020),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
       });
+    }
   }
 
   Future<void> _selectTime(BuildContext context, bool isStart) async {
@@ -40,7 +69,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       context: context,
       initialTime: isStart ? startTime : endTime,
     );
-    if (picked != null)
+    if (picked != null) {
       setState(() {
         if (isStart) {
           startTime = picked;
@@ -48,6 +77,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
           endTime = picked;
         }
       });
+    }
   }
 
   Future<void> _saveTask() async {
@@ -60,6 +90,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
     final formattedDate =
         "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+
     final task = {
       'user_id': widget.userId,
       'task_title': title,
@@ -68,18 +99,25 @@ class _AddTaskPageState extends State<AddTaskPage> {
       'task_start_time': startTime.format(context),
       'task_end_time': endTime.format(context),
       'task_priority': isHighPriority ? 1 : 0,
-      'task_status_id': 0
+      'task_status_id': widget.task?['task_status_id'] ?? 0,
     };
 
     try {
-      await DatabaseHelper.instance.insertTask(task);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Task created successfully!')),
-      );
-      Navigator.pop(context);
+      if (widget.task != null) {
+        await DatabaseHelper.instance.updateTask(widget.task!['task_id'], task);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Task updated successfully!')),
+        );
+      } else {
+        await DatabaseHelper.instance.insertTask(task);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Task created successfully!')),
+        );
+      }
+      Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create task: $e')),
+        SnackBar(content: Text('Failed to save task: $e')),
       );
     }
   }
@@ -100,8 +138,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   width: MediaQuery.of(context).size.width,
                   height: 350,
                   color: ColorsList.kAuthBackground,
-                  padding: EdgeInsets.only(
-                      left: 30.0, top: 40.0, bottom: 20.0, right: 30.0),
+                  padding: EdgeInsets.all(30.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -116,12 +153,14 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         ),
                       ),
                       SizedBox(height: 20),
-                      StyledText.mainHeading(
-                        text: 'Create new task',
-                        color: Colors.black,
-                      ),
+                      if (widget.task == null)
+                        StyledText.mainHeading(
+                          text: 'Create new task',
+                          color: Colors.black,
+                        ),
                       SizedBox(height: 15),
                       TextField(
+                        controller: TextEditingController(text: title),
                         onChanged: (value) {
                           setState(() {
                             title = value;
@@ -190,7 +229,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 ),
                 SizedBox(height: 20),
                 Padding(
-                    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
+                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -235,6 +274,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   padding:
                   EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
                   child: TextField(
+                    controller: TextEditingController(text: description),
                     maxLines: 3,
                     maxLength: 300,
                     onChanged: (value) {
@@ -293,7 +333,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     width: 40,
                     height: 10,
                     child: StyledText.accentLabel(
-                        text: 'Create Task', color: Colors.white),
+                      text: widget.task != null ? 'Update Task' : 'Create Task',
+                      color: Colors.white,
+                    ),
                     color: ColorsList.kLightGreen,
                     padding: EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 20.0),

@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tasker/screens/calendar.dart';
 import 'package:tasker/theme/colors.dart';
 
 class CustomSearchBar extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
-  // final ValueChanged<String>? onSearchChanged; // Додаємо callback для логіки пошуку
-  // final Map<String, dynamic> user; // Інформація про користувача
-
-  // CustomSearchBar({this.onSearchChanged, required this.user}); // Оновлений конструктор
 
   @override
   Widget build(BuildContext context) {
@@ -16,20 +11,6 @@ class CustomSearchBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            // child: Container(
-            //   height: 35.0,
-            //   decoration: BoxDecoration(
-            //     color: Colors.white,
-            //     borderRadius: BorderRadius.circular(30.0),
-            //     boxShadow: [
-            //       BoxShadow(
-            //         color: Colors.grey.withOpacity(0.3),
-            //         spreadRadius: 2,
-            //         blurRadius: 2,
-            //         offset: Offset(0, 2),
-            //       ),
-            //     ],
-            //   ),
               child: TextField(
                 cursorColor: ColorsList.kDarkGreen,
                 style: TextStyle(fontSize: 11),

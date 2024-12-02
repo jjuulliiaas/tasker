@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:tasker/screens/add_task.dart';
 import 'package:tasker/screens/history.dart';
 import '../database/db_helper.dart';
-import '../provider/task_provider.dart';
 import '../theme/colors.dart';
 import '../theme/styled_text.dart';
 import '../widgets/task_container.dart';
@@ -24,14 +22,48 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late Future<Map<String, dynamic>?> _userFuture;
+  Future<List<Map<String, dynamic>>>? _tasksFuture;
 
   @override
   void initState() {
     super.initState();
     _userFuture = DatabaseHelper.instance.getUserById(widget.userId);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TaskProvider>(context, listen: false).loadTasksForToday(widget.userId);
+    _loadTasks();
+  }
+
+  void _loadTasks() {
+    setState(() {
+      _tasksFuture = DatabaseHelper.instance.getTasksByDate(
+        widget.userId,
+        DateTime.now().toString().split(' ')[0],
+      );
     });
+  }
+
+  Future<void> _deleteTask(int taskId) async {
+    try {
+      await DatabaseHelper.instance.deleteTask(taskId);
+      _loadTasks();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Task deleted successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete task: $e')),
+      );
+    }
+  }
+
+  Future<void> _toggleTaskCompletion(Map<String, dynamic> task) async {
+    try {
+      final newStatus = task['task_status_id'] == 1 ? 0 : 1;
+      await DatabaseHelper.instance.updateTaskStatus(task['task_id'], newStatus);
+      _loadTasks();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update task status: $e')),
+      );
+    }
   }
 
   void _logOut() {
@@ -81,6 +113,21 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+  }
+
+  Future<void> _editTask(Map<String, dynamic> task) async {
+    final updated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddTaskPage(
+          userId: widget.userId,
+          task: task,
+        ),
+      ),
+    );
+    if (updated == true) {
+      _loadTasks();
+    }
   }
 
   @override
@@ -154,20 +201,11 @@ class _HomePageState extends State<HomePage> {
               text: 'My Tasks',
               color: Colors.white,
             ),
-            flexibleChild: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    _scaffoldKey.currentState?.openDrawer();
-                  },
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
-                  icon: Icon(Icons.view_headline_rounded),
-                  iconSize: 50,
-                  color: ColorsList.kAuthBackground,
-                ),
-              ],
+            flexibleChild: IconButton(
+              onPressed: () {
+                _scaffoldKey.currentState?.openDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
             ),
           ),
           SliverToBoxAdapter(
@@ -176,18 +214,15 @@ class _HomePageState extends State<HomePage> {
               child: CustomSearchBar(),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
-              child: StyledText.accentLabel(
-                text: 'Today\'s Tasks',
-                color: Colors.black,
-              ),
-            ),
-          ),
-          Consumer<TaskProvider>(
-            builder: (context, taskProvider, child) {
-              if (taskProvider.tasks.isEmpty) {
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: _tasksFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return SliverToBoxAdapter(
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
                 return SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
@@ -200,37 +235,25 @@ class _HomePageState extends State<HomePage> {
                   ),
                 );
               }
+              final tasks = snapshot.data!;
               return SliverList(
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                    final task = taskProvider.tasks[index];
-                    return Dismissible(
-                      key: Key(task['task_id'].toString()),
-                      direction: DismissDirection.horizontal,
-                      onDismissed: (direction) {
-                        taskProvider.deleteTask(task['task_id']);
-                      },
-                      background: Container(
-                        color: ColorsList.kRed,
-                        alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.only(left: 20),
-                        child: Icon(Icons.delete_forever, color: Colors.white),
+                    final task = tasks[index];
+                    return GestureDetector(
+                      onTap: () => _editTask(task),
+                      child: TaskContainer(
+                        task: task,
+                        onDelete: () => _deleteTask(task['task_id']),
+                        onToggleComplete: () => _toggleTaskCompletion(task),
                       ),
-                      secondaryBackground: Container(
-                        color: ColorsList.kRed,
-                        alignment: Alignment.centerRight,
-                        padding: EdgeInsets.only(right: 20),
-                        child: Icon(Icons.delete_forever, color: Colors.white),
-                      ),
-                      child: TaskContainer(task: task),
                     );
                   },
-                  childCount: taskProvider.tasks.length,
+                  childCount: tasks.length,
                 ),
               );
-
             },
-          )
+          ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -250,9 +273,7 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(
               builder: (context) => AddTaskPage(userId: widget.userId),
             ),
-          ).then((_) {
-            Provider.of<TaskProvider>(context, listen: false).loadTasksForToday(widget.userId);
-          });
+          ).then((_) => _loadTasks());
         },
         isHomeSelected: true,
         isHistorySelected: false,
