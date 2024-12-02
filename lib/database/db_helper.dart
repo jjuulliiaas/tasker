@@ -146,6 +146,20 @@ class DatabaseHelper {
     }
   }
 
+  Future<void> updateTaskStatus(int taskId, int status) async {
+    final db = await instance.database;
+    await db.update(
+      'tasks',
+      {'task_status_id': status},
+      where: 'task_id = ?',
+      whereArgs: [taskId],
+    );
+  }
+
+  Future<void> deleteTask(int taskId) async {
+    final db = await instance.database;
+    await db.delete('tasks', where: 'task_id = ?', whereArgs: [taskId]);
+  }
 
   Future<List<Map<String, dynamic>>> getTasksByDate(int userId, String date) async {
     final db = await database;

@@ -153,7 +153,7 @@ class _HistoryPageState extends State<HistoryPage> {
             expandedHeight: 150.0,
             backgroundColor: ColorsList.kLightGreen,
             title: StyledText.mainHeading(
-              text: 'Calendar',
+              text: 'History',
               color: Colors.white,
             ),
             flexibleChild: Column(

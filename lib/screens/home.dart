@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tasker/screens/add_task.dart';
 import 'package:tasker/screens/history.dart';
 import '../database/db_helper.dart';
+import '../provider/task_provider.dart';
 import '../theme/colors.dart';
 import '../theme/styled_text.dart';
 import '../widgets/task_container.dart';
@@ -40,6 +42,24 @@ class _HomePageState extends State<HomePage> {
     return tasks;
   }
 
+  Future<void> _toggleTaskCompletion(Map<String, dynamic> task) async {
+    final newStatus = task['task_status_id'] == 1 ? 0 : 1;
+
+    try {
+      await DatabaseHelper.instance.updateTaskStatus(task['task_id'], newStatus);
+
+      setState(() {
+        task['task_status_id'] = newStatus; // Оновлюємо статус у списку
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update task status: $e')),
+      );
+    }
+  }
+
+
+
   void _logOut() {
     Navigator.pushAndRemoveUntil(
       context,
@@ -47,6 +67,7 @@ class _HomePageState extends State<HomePage> {
           (route) => false,
     );
   }
+
 
   void _deleteAccount() async {
     try {
@@ -218,15 +239,27 @@ class _HomePageState extends State<HomePage> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                       child: TaskContainer(
-                        title: task['task_title'],
-                        time: "${task['task_start_time']} - ${task['task_end_time']}",
-                        description: task['task_description'] ?? '',
-                        onDismissed: () {
-                          setState(() {
-                            _tasksFuture = _fetchTasksForToday();
-                          });
-                        },
-                      ),
+                      title: task['task_title'],
+                      time: "${task['task_start_time']} - ${task['task_end_time']}",
+                      description: task['task_description'] ?? '',
+                      isHighPriority: task['task_priority'] == 1,
+                      isCompleted: task['task_status_id'] == 1, // Перевіряємо статус виконання
+                      onDismissed: () {
+                        setState(() {
+                          _tasksFuture = _fetchTasksForToday();
+                        });
+                      },
+                      onToggleComplete: () async {
+                        final newStatus = task['task_status_id'] == 1 ? 0 : 1; // Тогл статусу
+                        await DatabaseHelper.instance.updateTaskStatus(task['task_id'], newStatus);
+                        setState(() {
+                          _tasksFuture = _fetchTasksForToday();
+                        });
+                      },
+                    )
+
+
+
                     );
                   },
                 );

@@ -5,13 +5,19 @@ class TaskContainer extends StatelessWidget {
   final String title;
   final String time;
   final String description;
+  final bool isHighPriority;
+  final bool isCompleted; // Додано поле для перевірки виконаності
   final VoidCallback onDismissed;
+  final VoidCallback onToggleComplete; // Колбек для зміни статусу виконання
 
   TaskContainer({
     required this.title,
     required this.time,
     required this.description,
+    this.isHighPriority = false,
+    this.isCompleted = false,
     required this.onDismissed,
+    required this.onToggleComplete,
   });
 
   @override
@@ -49,9 +55,15 @@ class TaskContainer extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundColor: ColorsList.kGrey,
+                  GestureDetector(
+                    onTap: onToggleComplete, // Викликаємо функцію при натисканні
+                    child: CircleAvatar(
+                      radius: 12,
+                      backgroundColor: isCompleted ? Colors.green : ColorsList.kGrey,
+                      child: isCompleted
+                          ? Icon(Icons.check, color: Colors.white, size: 16)
+                          : null,
+                    ),
                   ),
                   SizedBox(width: 12),
                   Expanded(
@@ -60,10 +72,15 @@ class TaskContainer extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: isCompleted ? Colors.grey : Colors.black,
+                        decoration:
+                        isCompleted ? TextDecoration.lineThrough : null,
                       ),
                     ),
                   ),
+                  if (isHighPriority)
+                    Icon(Icons.star, color: Colors.yellow, size: 16),
+                  SizedBox(width: 8),
                   Container(
                     padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 13.0),
                     decoration: BoxDecoration(
@@ -72,13 +89,14 @@ class TaskContainer extends StatelessWidget {
                       border: Border.all(color: ColorsList.kAuthBackground),
                     ),
                     child: Text(
-                        time,
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Montserrat',
-                          color: ColorsList.kDarkGreen,
-                        ),),
+                      time,
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Montserrat',
+                        color: ColorsList.kDarkGreen,
+                      ),
+                    ),
                   ),
                 ],
               ),
