@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:tasker/screens/add_task.dart';
 import 'package:tasker/screens/history.dart';
 import '../database/db_helper.dart';
 import '../theme/colors.dart';
 import '../theme/styled_text.dart';
-import '../widgets/search_bar.dart' as custom;
 import '../widgets/task_container.dart';
-import '../widgets/bottom_nav_bar.dart';
 import '../widgets/custom_sliver_app_bar.dart';
-import '../screens/add_task.dart';
+import '../widgets/search_bar.dart';
+import '../widgets/bottom_nav_bar.dart';
 import 'login.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,48 +22,22 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late Future<Map<String, dynamic>?> _userFuture;
-  Map<String, dynamic>? _user; // Локальна змінна для збереження користувача
-
-  final List<Map<String, String>> tasks = [
-    {
-      'title': 'Create design',
-      'time': '10:00-12:00',
-      'description': 'Design the app UI.',
-    },
-    {
-      'title': 'Develop UI',
-      'time': '12:00-14:00',
-      'description': 'Code the UI components.',
-    },
-    {
-      'title': 'Testing',
-      'time': '14:00-16:00',
-      'description': 'Test the app for bugs.',
-    },
-  ];
+  late Future<List<Map<String, dynamic>>> _tasksFuture;
 
   @override
   void initState() {
     super.initState();
     _userFuture = DatabaseHelper.instance.getUserById(widget.userId);
+    _tasksFuture = _fetchTasksForToday();
   }
 
-  void _deleteAccount() async {
-    try {
-      await DatabaseHelper.instance.deleteAccount(widget.userId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Account deleted successfully!')),
-      );
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-            (route) => false,
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete account: $e')),
-      );
-    }
+  Future<List<Map<String, dynamic>>> _fetchTasksForToday() async {
+    final today = DateTime.now();
+    final formattedDate =
+        "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+
+    final tasks = await DatabaseHelper.instance.getTasksByDate(widget.userId, formattedDate);
+    return tasks;
   }
 
   void _logOut() {
@@ -74,14 +48,27 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _deleteAccount() async {
+    try {
+      await DatabaseHelper.instance.deleteAccount(widget.userId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Account deleted successfully!')),
+      );
+      _logOut();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete account: $e')),
+      );
+    }
+  }
+
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Delete Account'),
-          content: Text(
-              'Are you sure you want to delete your account? This action cannot be undone.'),
+          content: Text('Are you sure you want to delete your account? This action cannot be undone.'),
           actions: [
             TextButton(
               child: Text('Cancel'),
@@ -122,8 +109,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               );
             }
-            _user = snapshot.data; // Зберігаємо користувача
-            final userName = _user!['user_name'] ?? 'Unknown';
+            final userName = snapshot.data!['user_name'] ?? 'Unknown';
             return ListView(
               children: [
                 DrawerHeader(
@@ -193,67 +179,85 @@ class _HomePageState extends State<HomePage> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(5.0),
-              child: custom.CustomSearchBar(),
+              child: CustomSearchBar(),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 50.0, vertical: 5.0),
+              padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0.0),
               child: StyledText.accentLabel(
-                text: 'Today, 1 December',
+                text: 'Today\'s Tasks',
                 color: Colors.black,
               ),
             ),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 5.0, horizontal: 10.0),
-                  child: TaskContainer(
-                    title: tasks[index]['title']!,
-                    time: tasks[index]['time']!,
-                    description: tasks[index]['description']!,
-                    onDismissed: () {
-                      setState(() {
-                        tasks.removeAt(index);
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Task removed')),
-                      );
-                    },
-                  ),
+          SliverToBoxAdapter(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _tasksFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Center(
+                      child: StyledText.accentLabel(
+                        text: 'No tasks for today',
+                        color: Colors.grey,
+                      ),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    final task = snapshot.data![index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                      child: TaskContainer(
+                        title: task['task_title'],
+                        time: "${task['task_start_time']} - ${task['task_end_time']}",
+                        description: task['task_description'] ?? '',
+                        onDismissed: () {
+                          setState(() {
+                            _tasksFuture = _fetchTasksForToday();
+                          });
+                        },
+                      ),
+                    );
+                  },
                 );
               },
-              childCount: tasks.length,
             ),
           ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: CustomBottomNavigationBar(
-        onHomeTap: () {
-          // Already on home
-        },
+        onHomeTap: () {},
         onHistoryTap: () {
-          if (_user != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HistoryPage(
-                  user: _user!, // Передаємо користувача
-                ),
-              ),
-            );
-          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HistoryPage(userId: widget.userId),
+            ),
+          );
         },
         onAddTaskTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddTaskPage()),
-          );
+            MaterialPageRoute(
+              builder: (context) =>
+                  AddTaskPage(userId: widget.userId),
+            ),
+          ).then((_) {
+            setState(() {
+              _tasksFuture = _fetchTasksForToday();
+            });
+          });
         },
         isHomeSelected: true,
         isHistorySelected: false,

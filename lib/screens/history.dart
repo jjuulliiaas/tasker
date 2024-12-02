@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tasker/screens/home.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../database/db_helper.dart';
 import '../theme/colors.dart';
 import '../theme/styled_text.dart';
@@ -8,11 +8,12 @@ import '../widgets/bottom_nav_bar.dart';
 import '../widgets/main_buttons.dart';
 import '../widgets/custom_sliver_app_bar.dart';
 import '../screens/add_task.dart';
+import 'login.dart';
 
 class HistoryPage extends StatefulWidget {
-  final Map<String, dynamic> user; // Передаємо інформацію про користувача
+  final int userId; // Передаємо userId
 
-  HistoryPage({required this.user});
+  HistoryPage({required this.userId});
 
   @override
   State<HistoryPage> createState() => _HistoryPageState();
@@ -20,24 +21,33 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late Future<Map<String, dynamic>?> _userFuture;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    _userFuture = DatabaseHelper.instance.getUserById(widget.userId);
+  }
 
   void _logOut() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => HomePage(userId: widget.user['user_id'])),
+      MaterialPageRoute(builder: (context) => LoginPage()),
           (route) => false,
     );
   }
 
   void _deleteAccount() async {
     try {
-      await DatabaseHelper.instance.deleteAccount(widget.user['user_id']);
+      await DatabaseHelper.instance.deleteAccount(widget.userId);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Account deleted successfully!')),
       );
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => HomePage(userId: widget.user['user_id'])),
+        MaterialPageRoute(builder: (context) => LoginPage()),
             (route) => false,
       );
     } catch (e) {
@@ -75,60 +85,75 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-  int selectedIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: ColorsList.kAppBackground,
       drawer: Drawer(
-        child: ListView(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: ColorsList.kDarkGreen),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    radius: 40,
+        child: FutureBuilder<Map<String, dynamic>?>(
+          future: _userFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError || snapshot.data == null) {
+              return Center(
+                child: StyledText.mainHeading(
+                  text: 'Error loading user',
+                  color: Colors.red,
+                ),
+              );
+            }
+            final userName = snapshot.data!['user_name'] ?? 'Unknown';
+            return ListView(
+              children: [
+                DrawerHeader(
+                  decoration: BoxDecoration(color: ColorsList.kDarkGreen),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.grey,
+                        radius: 40,
+                      ),
+                      SizedBox(height: 10),
+                      StyledText.mainHeading(
+                        text: userName,
+                        color: Colors.white,
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 10),
-                  StyledText.mainHeading(
-                    text: widget.user['user_name'] ?? 'Unknown',
-                    color: Colors.white,
+                ),
+                ListTile(
+                  leading: Icon(Icons.logout, color: ColorsList.kDarkGreen),
+                  title: StyledText.accentLabel(
+                    text: 'Log Out',
+                    color: ColorsList.kDarkGreen,
                   ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.logout, color: ColorsList.kDarkGreen),
-              title: StyledText.accentLabel(
-                text: 'Log Out',
-                color: ColorsList.kDarkGreen,
-              ),
-              onTap: _logOut,
-            ),
-            Divider(),
-            ListTile(
-              leading: Icon(Icons.delete, color: Colors.red),
-              title: StyledText.accentLabel(
-                text: 'Delete Account',
-                color: Colors.red,
-              ),
-              onTap: _showDeleteAccountDialog,
-            ),
-          ],
+                  onTap: _logOut,
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(Icons.delete, color: Colors.red),
+                  title: StyledText.accentLabel(
+                    text: 'Delete Account',
+                    color: Colors.red,
+                  ),
+                  onTap: _showDeleteAccountDialog,
+                ),
+              ],
+            );
+          },
         ),
       ),
       body: CustomScrollView(
         slivers: [
           CustomSliverAppBar(
-            expandedHeight: 180.0,
+            expandedHeight: 150.0,
             backgroundColor: ColorsList.kLightGreen,
             title: StyledText.mainHeading(
-              text: 'History',
+              text: 'Calendar',
               color: Colors.white,
             ),
             flexibleChild: Column(
@@ -149,22 +174,122 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(5.0),
+              padding: const EdgeInsets.symmetric(horizontal: 1.0, vertical: 5.0),
               child: custom.CustomSearchBar(),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildFilterButton(0, 'All', ColorsList.kDarkGreen),
-                  _buildFilterButton(1, 'Done', Colors.green, Icons.circle),
-                  _buildFilterButton(2, 'Miss', Colors.red, Icons.circle),
-                  _buildFilterButton(3, 'Important', Colors.yellow, Icons.star),
-                ],
+              padding: const EdgeInsets.only(left: 30.0, right: 200.0),
+              child: MainButton(
+                width: 30,
+                height: 10,
+                child: Row(
+                  children: [
+                    Icon(Icons.add_rounded, color: Colors.white),
+                    StyledText.accentLabel(text: 'Add Task', color: Colors.white),
+                  ],
+                ),
+                color: ColorsList.kDarkGreen,
+                padding: EdgeInsets.only(
+                    left: 30.0, top: 20.0, bottom: 20.0, right: 30.0),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddTaskPage(userId: widget.userId),
+                    ),
+                  );
+                },
               ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: TableCalendar(
+                  firstDay: DateTime(2015),
+                  lastDay: DateTime(2101),
+                  focusedDay: _focusedDay,
+                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      _selectedDay = selectedDay;
+                      _focusedDay = focusedDay;
+                    });
+                  },
+                  calendarStyle: CalendarStyle(
+                    defaultTextStyle: TextStyle(fontSize: 10),
+                    weekendTextStyle: TextStyle(fontSize: 10),
+                    outsideTextStyle: TextStyle(fontSize: 10, color: Colors.grey),
+                    selectedTextStyle: TextStyle(
+                        fontSize: 11,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                    todayTextStyle: TextStyle(fontSize: 11, color: Colors.white),
+                    selectedDecoration: BoxDecoration(
+                      color: ColorsList.kDarkGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    todayDecoration: BoxDecoration(
+                      color: ColorsList.kLightGreen,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  headerStyle: HeaderStyle(
+                    formatButtonVisible: false,
+                    titleCentered: true,
+                    titleTextStyle: TextStyle(
+                      fontSize: 12,
+                    ),
+                    leftChevronIcon:
+                    Icon(Icons.chevron_left, color: ColorsList.kDarkGreen),
+                    rightChevronIcon:
+                    Icon(Icons.chevron_right, color: ColorsList.kDarkGreen),
+                  ),
+                  daysOfWeekStyle: DaysOfWeekStyle(
+                    weekendStyle: TextStyle(
+                        color: ColorsList.kDarkGreen,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold),
+                    weekdayStyle: TextStyle(
+                        color: ColorsList.kDarkGreen,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 5.0, horizontal: 10.0),
+                  child: Container(
+                    color: Colors.white,
+                    child: ListTile(
+                      title: Text('Task title'),
+                      subtitle: Text('Task details'),
+                    ),
+                  ),
+                );
+              },
+              childCount: 5,
             ),
           ),
         ],
@@ -172,50 +297,19 @@ class _HistoryPageState extends State<HistoryPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: CustomBottomNavigationBar(
         onHomeTap: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomePage(userId: widget.user['user_id']),
-            ),
-          );
+          Navigator.pop(context); // Повернення на головну
         },
         onHistoryTap: () {
-          // Already on history page
+          // Already on history
         },
         onAddTaskTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddTaskPage()),
+            MaterialPageRoute(builder: (context) => AddTaskPage(userId: widget.userId)),
           );
         },
         isHomeSelected: false,
         isHistorySelected: true,
-      ),
-    );
-  }
-
-  Widget _buildFilterButton(int index, String label, Color iconColor, [IconData? icon]) {
-    bool isActive = selectedIndex == index;
-    return MainButton(
-      width: 10,
-      height: 5,
-      color: isActive ? ColorsList.kAuthBackground : Colors.white,
-      padding: EdgeInsets.zero,
-      onPressed: () {
-        setState(() {
-          selectedIndex = index;
-        });
-      },
-      child: Row(
-        children: [
-          if (icon != null)
-            Icon(icon, size: 15, color: iconColor),
-          if (icon != null) SizedBox(width: 5),
-          StyledText.defaultLabel(
-            text: label,
-            color: isActive ? ColorsList.kDarkGreen : ColorsList.kDarkGreen,
-          ),
-        ],
       ),
     );
   }

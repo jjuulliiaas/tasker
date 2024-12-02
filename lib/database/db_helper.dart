@@ -115,11 +115,11 @@ class DatabaseHelper {
     return result.isNotEmpty ? result.first : null;
   }
 
-  // Додавання нового завдання
-  Future<int> createTask(Map<String, dynamic> task) async {
-    final db = await instance.database;
-    return await db.insert('tasks', task);
+  Future<int> insertTask(Map<String, dynamic> task) async {
+  final db = await database;
+  return await db.insert('tasks', task);
   }
+
 
   // Отримання всіх завдань для користувача
   Future<List<Map<String, dynamic>>> readAllTasks(int userId) async {
@@ -130,6 +130,40 @@ class DatabaseHelper {
       whereArgs: [userId],
     );
   }
+
+  Future<int> updateTask(int taskId, Map<String, dynamic> updatedFields) async {
+    final db = await database;
+    try {
+      return await db.update(
+        'tasks',
+        updatedFields,
+        where: 'task_id = ?',
+        whereArgs: [taskId],
+      );
+    } catch (e) {
+      print("Error updating task $taskId: $e");
+      throw Exception("Failed to update task");
+    }
+  }
+
+
+  Future<List<Map<String, dynamic>>> getTasksByDate(int userId, String date) async {
+    final db = await database;
+    try {
+      // Виконання запиту для отримання завдань за поточною датою
+      final tasks = await db.query(
+        'tasks',
+        where: 'user_id = ? AND task_due_date = ?',
+        whereArgs: [userId, date],
+        orderBy: 'task_id DESC',
+      );
+      return tasks;
+    } catch (e) {
+      print("Error fetching tasks for date $date: $e");
+      return [];
+    }
+  }
+
 
   // Діагностичні методи
   Future<void> checkUsersTable() async {

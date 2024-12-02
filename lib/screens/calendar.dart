@@ -8,6 +8,10 @@ import '../theme/styled_text.dart';
 import '../widgets/custom_sliver_app_bar.dart';
 
 class CalendarPage extends StatefulWidget {
+  final int userId; // Додаємо userId
+
+  CalendarPage({required this.userId});
+
   @override
   State<CalendarPage> createState() => _CalendarPageState();
 }
@@ -65,7 +69,9 @@ class _CalendarPageState extends State<CalendarPage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddTaskPage()),
+                    MaterialPageRoute(
+                      builder: (context) => AddTaskPage(userId: widget.userId), // Передаємо userId
+                    ),
                   );
                 },
               ),
