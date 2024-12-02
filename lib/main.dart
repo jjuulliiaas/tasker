@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => TaskProvider(1), // Передайте userId
+          create: (_) => TaskProvider(), // Передайте userId
         ),
       ],
       child: MaterialApp(

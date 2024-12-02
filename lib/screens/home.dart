@@ -24,41 +24,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late Future<Map<String, dynamic>?> _userFuture;
-  late Future<List<Map<String, dynamic>>> _tasksFuture;
 
   @override
   void initState() {
     super.initState();
     _userFuture = DatabaseHelper.instance.getUserById(widget.userId);
-    _tasksFuture = _fetchTasksForToday();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TaskProvider>(context, listen: false).loadTasksForToday(widget.userId);
+    });
   }
-
-  Future<List<Map<String, dynamic>>> _fetchTasksForToday() async {
-    final today = DateTime.now();
-    final formattedDate =
-        "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
-
-    final tasks = await DatabaseHelper.instance.getTasksByDate(widget.userId, formattedDate);
-    return tasks;
-  }
-
-  Future<void> _toggleTaskCompletion(Map<String, dynamic> task) async {
-    final newStatus = task['task_status_id'] == 1 ? 0 : 1;
-
-    try {
-      await DatabaseHelper.instance.updateTaskStatus(task['task_id'], newStatus);
-
-      setState(() {
-        task['task_status_id'] = newStatus; // Оновлюємо статус у списку
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update task status: $e')),
-      );
-    }
-  }
-
-
 
   void _logOut() {
     Navigator.pushAndRemoveUntil(
@@ -67,7 +41,6 @@ class _HomePageState extends State<HomePage> {
           (route) => false,
     );
   }
-
 
   void _deleteAccount() async {
     try {
@@ -212,15 +185,11 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: _tasksFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
-                  return Padding(
+          Consumer<TaskProvider>(
+            builder: (context, taskProvider, child) {
+              if (taskProvider.tasks.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Center(
                       child: StyledText.accentLabel(
@@ -228,44 +197,40 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.grey,
                       ),
                     ),
-                  );
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final task = snapshot.data![index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                      child: TaskContainer(
-                      title: task['task_title'],
-                      time: "${task['task_start_time']} - ${task['task_end_time']}",
-                      description: task['task_description'] ?? '',
-                      isHighPriority: task['task_priority'] == 1,
-                      isCompleted: task['task_status_id'] == 1, // Перевіряємо статус виконання
-                      onDismissed: () {
-                        setState(() {
-                          _tasksFuture = _fetchTasksForToday();
-                        });
+                  ),
+                );
+              }
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                    final task = taskProvider.tasks[index];
+                    return Dismissible(
+                      key: Key(task['task_id'].toString()),
+                      direction: DismissDirection.horizontal,
+                      onDismissed: (direction) {
+                        taskProvider.deleteTask(task['task_id']);
                       },
-                      onToggleComplete: () async {
-                        final newStatus = task['task_status_id'] == 1 ? 0 : 1; // Тогл статусу
-                        await DatabaseHelper.instance.updateTaskStatus(task['task_id'], newStatus);
-                        setState(() {
-                          _tasksFuture = _fetchTasksForToday();
-                        });
-                      },
-                    )
-
-
-
+                      background: Container(
+                        color: ColorsList.kRed,
+                        alignment: Alignment.centerLeft,
+                        padding: EdgeInsets.only(left: 20),
+                        child: Icon(Icons.delete_forever, color: Colors.white),
+                      ),
+                      secondaryBackground: Container(
+                        color: ColorsList.kRed,
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.only(right: 20),
+                        child: Icon(Icons.delete_forever, color: Colors.white),
+                      ),
+                      child: TaskContainer(task: task),
                     );
                   },
-                );
-              },
-            ),
-          ),
+                  childCount: taskProvider.tasks.length,
+                ),
+              );
+
+            },
+          )
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -283,13 +248,10 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  AddTaskPage(userId: widget.userId),
+              builder: (context) => AddTaskPage(userId: widget.userId),
             ),
           ).then((_) {
-            setState(() {
-              _tasksFuture = _fetchTasksForToday();
-            });
+            Provider.of<TaskProvider>(context, listen: false).loadTasksForToday(widget.userId);
           });
         },
         isHomeSelected: true,
