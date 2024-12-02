@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tasker/provider/task_provider.dart';
 import 'package:tasker/screens/home.dart';
 import 'package:tasker/theme/colors.dart';
 
@@ -12,20 +10,28 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => TaskProvider(), // Передайте userId
-        ),
-      ],
-      child: MaterialApp(
+    return MaterialApp(
         title: 'Tasker',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: ColorsList.kDarkGreen),  useMaterial3: true,),
+          colorScheme: ColorScheme.fromSeed(seedColor: ColorsList.kDarkGreen),
+          useMaterial3: true,
+          snackBarTheme: SnackBarThemeData(
+            backgroundColor: Colors.green[800],
+            contentTextStyle: TextStyle(
+              color: Colors.white,
+              fontSize: 10.0,
+              fontWeight: FontWeight.bold,
+            ),
+            actionTextColor: Colors.yellow,
+            elevation: 5,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),),
         debugShowCheckedModeBanner: false,
         home: HomePage(userId: 1),
-      ),
-    );
+      );
   }
 }
 

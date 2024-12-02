@@ -205,13 +205,21 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 _scaffoldKey.currentState?.openDrawer();
               },
-              icon: Icon(Icons.menu, color: Colors.white),
+              icon: Icon(Icons.view_headline_rounded),
+              iconSize: 30,
+              color: ColorsList.kAuthBackground,
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(5.0),
               child: CustomSearchBar(),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+              child: StyledText.accentLabel(text: 'Today\'s TO DO:', color: Colors.black87),
             ),
           ),
           FutureBuilder<List<Map<String, dynamic>>>(

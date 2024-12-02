@@ -5,13 +5,13 @@ import '../theme/colors.dart';
 import '../theme/styled_text.dart';
 import '../widgets/search_bar.dart' as custom;
 import '../widgets/bottom_nav_bar.dart';
-import '../widgets/main_buttons.dart';
 import '../widgets/custom_sliver_app_bar.dart';
-import '../screens/add_task.dart';
+import '../widgets/task_container.dart';
+import 'add_task.dart';
 import 'login.dart';
 
 class HistoryPage extends StatefulWidget {
-  final int userId; // Передаємо userId
+  final int userId;
 
   HistoryPage({required this.userId});
 
@@ -24,11 +24,61 @@ class _HistoryPageState extends State<HistoryPage> {
   late Future<Map<String, dynamic>?> _userFuture;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  Future<List<Map<String, dynamic>>>? _tasksFuture;
 
   @override
   void initState() {
     super.initState();
     _userFuture = DatabaseHelper.instance.getUserById(widget.userId);
+    _loadTasksForDay(_focusedDay);
+  }
+
+  void _loadTasksForDay(DateTime day) {
+    final formattedDate = "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+    setState(() {
+      _tasksFuture = DatabaseHelper.instance.getTasksByDate(widget.userId, formattedDate);
+    });
+  }
+
+  Future<void> _deleteTask(int taskId) async {
+    try {
+      await DatabaseHelper.instance.deleteTask(taskId);
+      _loadTasksForDay(_selectedDay ?? _focusedDay);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Task deleted successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete task: $e')),
+      );
+    }
+  }
+
+  Future<void> _toggleTaskCompletion(Map<String, dynamic> task) async {
+    try {
+      final newStatus = task['task_status_id'] == 1 ? 0 : 1;
+      await DatabaseHelper.instance.updateTaskStatus(task['task_id'], newStatus);
+      _loadTasksForDay(_selectedDay ?? _focusedDay);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update task status: $e')),
+      );
+    }
+  }
+
+  Future<void> _editTask(Map<String, dynamic> task) async {
+    final updated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddTaskPage(
+          userId: widget.userId,
+          task: task,
+        ),
+      ),
+    );
+    if (updated == true) {
+      _loadTasksForDay(_selectedDay ?? _focusedDay);
+    }
   }
 
   void _logOut() {
@@ -45,11 +95,7 @@ class _HistoryPageState extends State<HistoryPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Account deleted successfully!')),
       );
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-            (route) => false,
-      );
+      _logOut();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to delete account: $e')),
@@ -63,8 +109,7 @@ class _HistoryPageState extends State<HistoryPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Delete Account'),
-          content: Text(
-              'Are you sure you want to delete your account? This action cannot be undone.'),
+          content: Text('Are you sure you want to delete your account? This action cannot be undone.'),
           actions: [
             TextButton(
               child: Text('Cancel'),
@@ -156,20 +201,13 @@ class _HistoryPageState extends State<HistoryPage> {
               text: 'History',
               color: Colors.white,
             ),
-            flexibleChild: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    _scaffoldKey.currentState?.openDrawer();
-                  },
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
-                  icon: Icon(Icons.view_headline_rounded),
-                  iconSize: 50,
-                  color: ColorsList.kAuthBackground,
-                ),
-              ],
+            flexibleChild: IconButton(
+              onPressed: () {
+                _scaffoldKey.currentState?.openDrawer();
+              },
+              icon: Icon(Icons.view_headline_rounded),
+              iconSize: 30,
+              color: ColorsList.kAuthBackground,
             ),
           ),
           SliverToBoxAdapter(
@@ -180,33 +218,7 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(left: 30.0, right: 200.0),
-              child: MainButton(
-                width: 30,
-                height: 10,
-                child: Row(
-                  children: [
-                    Icon(Icons.add_rounded, color: Colors.white),
-                    StyledText.accentLabel(text: 'Add Task', color: Colors.white),
-                  ],
-                ),
-                color: ColorsList.kDarkGreen,
-                padding: EdgeInsets.only(
-                    left: 30.0, top: 20.0, bottom: 20.0, right: 30.0),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddTaskPage(userId: widget.userId),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 20.0),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -230,16 +242,21 @@ class _HistoryPageState extends State<HistoryPage> {
                       _selectedDay = selectedDay;
                       _focusedDay = focusedDay;
                     });
+                    _loadTasksForDay(selectedDay);
                   },
                   calendarStyle: CalendarStyle(
                     defaultTextStyle: TextStyle(fontSize: 10),
                     weekendTextStyle: TextStyle(fontSize: 10),
                     outsideTextStyle: TextStyle(fontSize: 10, color: Colors.grey),
                     selectedTextStyle: TextStyle(
-                        fontSize: 11,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
-                    todayTextStyle: TextStyle(fontSize: 11, color: Colors.white),
+                      fontSize: 11,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    todayTextStyle: TextStyle(
+                      fontSize: 11,
+                      color: Colors.white,
+                    ),
                     selectedDecoration: BoxDecoration(
                       color: ColorsList.kDarkGreen,
                       shape: BoxShape.circle,
@@ -255,49 +272,68 @@ class _HistoryPageState extends State<HistoryPage> {
                     titleTextStyle: TextStyle(
                       fontSize: 12,
                     ),
-                    leftChevronIcon:
-                    Icon(Icons.chevron_left, color: ColorsList.kDarkGreen),
-                    rightChevronIcon:
-                    Icon(Icons.chevron_right, color: ColorsList.kDarkGreen),
+                    leftChevronIcon: Icon(Icons.chevron_left, color: ColorsList.kDarkGreen),
+                    rightChevronIcon: Icon(Icons.chevron_right, color: ColorsList.kDarkGreen),
                   ),
                   daysOfWeekStyle: DaysOfWeekStyle(
                     weekendStyle: TextStyle(
-                        color: ColorsList.kDarkGreen,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold),
+                      color: ColorsList.kDarkGreen,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                     weekdayStyle: TextStyle(
-                        color: ColorsList.kDarkGreen,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold),
+                      color: ColorsList.kDarkGreen,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 5.0, horizontal: 10.0),
-                  child: Container(
-                    color: Colors.white,
-                    child: ListTile(
-                      title: Text('Task title'),
-                      subtitle: Text('Task details'),
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: _tasksFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return SliverToBoxAdapter(
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Center(
+                      child: StyledText.accentLabel(
+                        text: 'No tasks for the selected day',
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                 );
-              },
-              childCount: 5,
-            ),
+              }
+              final tasks = snapshot.data!;
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                    final task = tasks[index];
+                    return TaskContainer(
+                      task: task,
+                      onDelete: () => _deleteTask(task['task_id']),
+                      onToggleComplete: () => _toggleTaskCompletion(task),
+                    );
+                  },
+                  childCount: tasks.length,
+                ),
+              );
+            },
           ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: CustomBottomNavigationBar(
         onHomeTap: () {
-          Navigator.pop(context); // Повернення на головну
+          Navigator.pop(context); // Navigate to Home
         },
         onHistoryTap: () {
           // Already on history
@@ -306,7 +342,7 @@ class _HistoryPageState extends State<HistoryPage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddTaskPage(userId: widget.userId)),
-          );
+          ).then((_) => _loadTasksForDay(_focusedDay));
         },
         isHomeSelected: false,
         isHistorySelected: true,

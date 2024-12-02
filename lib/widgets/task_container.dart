@@ -36,7 +36,7 @@ class TaskContainer extends StatelessWidget {
                   onTap: onToggleComplete,
                   child: CircleAvatar(
                     radius: 12,
-                    backgroundColor: isCompleted ? Colors.green : ColorsList.kGrey,
+                    backgroundColor: isCompleted ? Colors.green[800] : ColorsList.kGrey,
                     child: isCompleted
                         ? Icon(Icons.check, color: Colors.white, size: 16)
                         : null,
@@ -55,7 +55,7 @@ class TaskContainer extends StatelessWidget {
                   ),
                 ),
                 if (isHighPriority)
-                  Icon(Icons.star, color: Colors.yellow, size: 16),
+                  Icon(Icons.star, color: Colors.yellow, size: 25),
                 SizedBox(width: 8),
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 13.0),
@@ -89,7 +89,7 @@ class TaskContainer extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
+                icon: Icon(Icons.delete, color: Colors.red, size: 25,),
                 onPressed: onDelete,
               ),
             ),

@@ -164,7 +164,6 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> getTasksByDate(int userId, String date) async {
     final db = await database;
     try {
-      // Виконання запиту для отримання завдань за поточною датою
       final tasks = await db.query(
         'tasks',
         where: 'user_id = ? AND task_due_date = ?',
@@ -179,7 +178,6 @@ class DatabaseHelper {
   }
 
 
-  // Діагностичні методи
   Future<void> checkUsersTable() async {
     final db = await instance.database;
     final users = await db.rawQuery('SELECT * FROM users');
