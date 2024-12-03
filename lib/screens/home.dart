@@ -159,8 +159,9 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CircleAvatar(
-                        backgroundColor: Colors.grey,
                         radius: 40,
+                        backgroundImage: AssetImage('assets/images/user.png'),
+                        backgroundColor: Colors.transparent,
                       ),
                       SizedBox(height: 10),
                       StyledText.mainHeading(

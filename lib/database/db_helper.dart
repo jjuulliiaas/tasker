@@ -31,7 +31,6 @@ class DatabaseHelper {
   Future<void> _createDB(Database db, int version) async {
     print("Creating database...");
 
-    // Таблиця користувачів
     await db.execute('''
       CREATE TABLE IF NOT EXISTS users (
         user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +40,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // Таблиця завдань
     await db.execute('''
       CREATE TABLE IF NOT EXISTS tasks (
         task_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +55,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // Таблиця статусів завдань
     await db.execute('''
       CREATE TABLE IF NOT EXISTS task_status (
         status_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,11 +70,9 @@ class DatabaseHelper {
     db.close();
   }
 
-  // Реєстрація нового користувача
   Future<int> userSignUp(String name, String email, String password) async {
     final db = await instance.database;
 
-    // Перевірка наявності користувача
     final existingUser = await db.query(
       'users',
       where: 'user_email = ?',
@@ -87,7 +82,6 @@ class DatabaseHelper {
       throw Exception("This e-mail is already registered.");
     }
 
-    // Хешуємо пароль
     final hashedPassword = sha256.convert(utf8.encode(password)).toString();
 
     final user = {
@@ -99,11 +93,9 @@ class DatabaseHelper {
     return await db.insert('users', user);
   }
 
-  // Авторизація користувача
   Future<Map<String, dynamic>?> loginUser(String email, String password) async {
     final db = await instance.database;
 
-    // Хешуємо пароль для порівняння
     final hashedPassword = sha256.convert(utf8.encode(password)).toString();
 
     final result = await db.query(
@@ -214,7 +206,5 @@ class DatabaseHelper {
 
     print("User with ID $userId deleted from database.");
   }
-
-
 
 }

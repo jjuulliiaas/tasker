@@ -38,6 +38,7 @@ flutter:
     - assets/fonts/Montserrat-Regular.ttf
     - assets/fonts/Montserrat-Bold.ttf
     - assets/images/logo.png
+    - assets/images/user.png
 
   fonts:
     - family: Comfortaa

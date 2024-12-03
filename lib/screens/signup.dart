@@ -58,25 +58,21 @@ class _SignupPageState extends State<SignupPage> {
     }
 
     try {
-      // Реєструємо користувача в базі даних
       await DatabaseHelper.instance.userSignUp(
         _nameController.text,
         _emailController.text,
         _passwordController.text,
       );
 
-      // Показуємо повідомлення про успішну реєстрацію
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registration successful!')),
       );
 
-      // Переходимо на сторінку авторизації
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginPage()),
       );
     } catch (e) {
-      // Обробка помилок (наприклад, якщо email вже зареєстрований)
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       );

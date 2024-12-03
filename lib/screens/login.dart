@@ -5,7 +5,7 @@ import 'package:tasker/theme/colors.dart';
 import 'package:tasker/theme/styled_text.dart';
 import 'package:tasker/widgets/main_buttons.dart';
 
-import '../database/db_helper.dart'; // Імпорт класу DatabaseHelper
+import '../database/db_helper.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -43,31 +43,26 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      // Авторизація користувача
       final user = await DatabaseHelper.instance.loginUser(
         _emailController.text,
         _passwordController.text,
       );
 
       if (user != null) {
-        // Успішний вхід
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login successful! Welcome ${user['user_name']}')),
         );
 
-        // Перехід на екран зі списком завдань
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomePage(userId: user['user_id'])),
         );
       } else {
-        // Неправильний email або пароль
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Invalid email or password')),
         );
       }
     } catch (e) {
-      // Обробка помилок
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       );

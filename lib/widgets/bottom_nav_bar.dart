@@ -29,7 +29,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              // Home button with active state
               GestureDetector(
                 onTap: onHomeTap,
                 child: Container(
@@ -43,7 +42,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
               ),
               SizedBox(width: 40),
 
-              // History button with active state
               GestureDetector(
                 onTap: onHistoryTap,
                 child: Container(

@@ -44,7 +44,6 @@ class CustomSliverAppBar extends StatelessWidget {
                 ),
               ),
 
-              // flexible content
               Positioned(
                 left: 20.0,
                 top: 50.0,

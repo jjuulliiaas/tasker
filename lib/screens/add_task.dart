@@ -160,186 +160,181 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   color: Colors.black,
                 ),
               SizedBox(height: 15),
-    TextField(
-    controller: titleController,
-    decoration: InputDecoration(
-    labelText: 'Title',
-    labelStyle: TextStyle(
-    color: ColorsList.kDarkGreen,
-    fontSize: 12,
-    ),
-    enabledBorder: UnderlineInputBorder(
-    borderSide: BorderSide(color: Colors.black),
-    ),
-    focusedBorder: UnderlineInputBorder(
-    borderSide: BorderSide(color: Colors.black),
-    ),
-    ),
-    ),
-    SizedBox(height: 10),
-    Row(
-    children: [
-    Expanded(
-    child: TextField(
-    style: TextStyle(fontSize: 12),
-    readOnly: true,
-    onTap: () => _selectDate(context),
-    decoration: InputDecoration(
-    labelText: 'Date',
-    labelStyle: TextStyle(
-    color: ColorsList.kDarkGreen,
-    fontSize: 12,
-    ),
-    suffixIcon: GestureDetector(
-    onTap: () {
-    _selectDate(context);
-    },
-    child: Container(
-    height: 40.0,
-    width: 40.0,
-    decoration: BoxDecoration(
-    color: ColorsList.kLightGreen,
-    shape: BoxShape.circle,
-    ),
-    child: Icon(Icons.calendar_month_rounded,
-    color: Colors.white),
-    ),
-    ),
-    enabledBorder: UnderlineInputBorder(
-    borderSide: BorderSide(color: Colors.black),
-    ),
-    focusedBorder: UnderlineInputBorder(
-    borderSide: BorderSide(color: Colors.black),
-    ),
-    ),
-    controller: TextEditingController(
-    text:
-    "${selectedDate.toLocal()}".split(' ')[0]),
-    ),
-    ),
-    ],
-    ),
-    SizedBox(height: 20),
-    ],
-    ),
-    ),
-    SizedBox(height: 20),
-    Padding(
-    padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
-    child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-    Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    StyledText.defaultLabel(
-    text: 'Start Time',
-    color: ColorsList.kDarkGreen,
-    ),
-    SizedBox(height: 8),
-    GestureDetector(
-    onTap: () => _selectTime(context, true),
-    child: StyledText.accentLabel(
-    text: startTime.format(context),
-    color: ColorsList.kDarkGreen,
-    ),
-    ),
-    ],
-    ),
-    Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    StyledText.defaultLabel(
-    text: 'End Time',
-    color: ColorsList.kDarkGreen,
-    ),
-    SizedBox(height: 8),
-    GestureDetector(
-    onTap: () => _selectTime(context, false),
-    child: StyledText.accentLabel(
-    text: endTime.format(context),
-    color: ColorsList.kDarkGreen,
-    ),
-    ),
-    ],
-    ),
-    ],
-    ),
-    ),
-    Padding(
-    padding:
-    EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
-    child: TextField(
-    controller: descriptionController,
-    maxLines: 3,
-    maxLength: 300,
-    decoration: InputDecoration(
-    labelText: 'Description',
-    labelStyle: TextStyle(
-    color: ColorsList.kDarkGreen,
-    fontSize: 12,
-    ),
-    enabledBorder: UnderlineInputBorder(
-    borderSide: BorderSide(color: Colors.black),
-    ),
-    focusedBorder: UnderlineInputBorder(
-    borderSide: BorderSide(color: Colors.black),
-    ),
-    ),
-    ),
-    ),
-    Padding(
-    padding:
-    EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
-    child: MainButton(
-    onPressed: () {
-    setState(() {
-    isHighPriority = !isHighPriority;
-    });
-    },
-      width: 34,
-      height: 10,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.star,
-            color: isHighPriority ? Colors.yellow : Colors.grey,
-          ),
-          SizedBox(width: 8),
-          StyledText.defaultLabel(
-            text: 'High Importance',
-            color: ColorsList.kDarkGreen,
-          ),
-        ],
-      ),
-      color: Colors.white,
-      padding:
-      EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-    ),
-    ),
-      Spacer(),
-      Center(
-        child: MainButton(
-          onPressed: _saveTask,
-          width: 40,
-          height: 10,
-          child: StyledText.accentLabel(
-            text: widget.task != null ? 'Update Task' : 'Create Task',
-            color: Colors.white,
-          ),
-          color: ColorsList.kLightGreen,
-          padding: EdgeInsets.symmetric(
-              vertical: 10.0, horizontal: 20.0),
-        ),
-      ),
-      SizedBox(height: 20),
-    ],
-    ),
-    ),
-          ),
-      ),
-    );
-  }
-}
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                  labelStyle: TextStyle(
+                  color: ColorsList.kDarkGreen,
+                  fontSize: 12,
+                ),
+                enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.black),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.black),
+                ),
+               ),
+              ),
+              SizedBox(height: 10),
+              Row(
+              children: [
+                Expanded(
+                child: TextField(
+                  style: TextStyle(fontSize: 12),
+                  readOnly: true,
+                  onTap: () => _selectDate(context),
+                  decoration: InputDecoration(
+                    labelText: 'Date',
+                    labelStyle: TextStyle(
+                    color: ColorsList.kDarkGreen,
+                    fontSize: 12,
+                  ),
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                  _selectDate(context);
+                  },
+                child: Container(
+                height: 40.0,
+                width: 40.0,
+                decoration: BoxDecoration(
+                  color: ColorsList.kLightGreen,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.calendar_month_rounded,
+                color: Colors.white),
+                ),
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                  ),
+                ),
+                controller: TextEditingController(
+                  text:
+                  "${selectedDate.toLocal()}".split(' ')[0]),
+                  ),
+                ),
+              ],
+              ),
+              SizedBox(height: 20),
+              ],),
+              ),
+              SizedBox(height: 20),
+              Padding(
+              padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 30.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    StyledText.defaultLabel(
+                      text: 'Start Time',
+                      color: ColorsList.kDarkGreen,
+                    ),
+                    SizedBox(height: 8),
+                    GestureDetector(
+                    onTap: () => _selectTime(context, true),
+                    child: StyledText.accentLabel(
+                      text: startTime.format(context),
+                      color: ColorsList.kDarkGreen,
+                    ),
+                    ),
+                  ],),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      StyledText.defaultLabel(
+                      text: 'End Time',
+                      color: ColorsList.kDarkGreen,
+                      ),
+                      SizedBox(height: 8),
+                      GestureDetector(
+                      onTap: () => _selectTime(context, false),
+                      child: StyledText.accentLabel(
+                        text: endTime.format(context),
+                        color: ColorsList.kDarkGreen,
+                        ),
+                      ),
+                    ],),
+                  ],),
+              ),
+              Padding(
+              padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+              child: TextField(
+                controller: descriptionController,
+                maxLines: 3,
+                maxLength: 300,
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  labelStyle: TextStyle(
+                    color: ColorsList.kDarkGreen,
+                    fontSize: 12,
+                    ),
+                  enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                  ),
+                  ),
+                ),
+              ),
+              Padding(
+              padding:
+              EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+              child: MainButton(
+              onPressed: () {
+              setState(() {
+              isHighPriority = !isHighPriority;
+              });
+              },
+                width: 34,
+                height: 10,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.star,
+                      color: isHighPriority ? Colors.yellow : Colors.grey,
+                    ),
+                    SizedBox(width: 8),
+                    StyledText.defaultLabel(
+                      text: 'High Importance',
+                      color: ColorsList.kDarkGreen,
+                    ),
+                  ],
+                ),
+                color: Colors.white,
+                padding:
+                EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              ),
+              ),
+                Spacer(),
+                Center(
+                  child: MainButton(
+                    onPressed: _saveTask,
+                    width: 40,
+                    height: 10,
+                    child: StyledText.accentLabel(
+                      text: widget.task != null ? 'Update Task' : 'Create Task',
+                      color: Colors.white,
+                    ),
+                    color: ColorsList.kLightGreen,
+                    padding: EdgeInsets.symmetric(
+                        vertical: 10.0, horizontal: 20.0),
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
+              ),
+              ),
+                    ),
+                ),
+              );
+            }
+          }
 

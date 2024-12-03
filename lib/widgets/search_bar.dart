@@ -29,33 +29,10 @@ class CustomSearchBar extends StatelessWidget {
                   labelStyle: TextStyle(fontSize: 10, color: Colors.grey),
                 ),
                 onChanged: (value) {
-                  // if (onSearchChanged != null) {
-                  //   onSearchChanged!(value); // Викликаємо зовнішню логіку пошуку
-                  // }
+
                 },
               ),
             ),
-          // ),
-          // SizedBox(width: 20),
-          // GestureDetector(
-          //   onTap: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) => CalendarPage(user: user), // Передаємо користувача
-          //       ),
-          //     );
-          //   },
-          //   child: Container(
-          //     height: 40.0,
-          //     width: 40.0,
-          //     decoration: BoxDecoration(
-          //       color: ColorsList.kLightGreen,
-          //       shape: BoxShape.circle,
-          //     ),
-          //     child: Icon(Icons.calendar_month_rounded, color: Colors.white),
-          //   ),
-          // ),
         ],
       ),
     );
