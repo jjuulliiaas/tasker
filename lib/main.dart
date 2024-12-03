@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tasker/screens/home.dart';
+import 'package:tasker/screens/login.dart';
 import 'package:tasker/theme/colors.dart';
 
 void main() {
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
             ),
           ),),
         debugShowCheckedModeBanner: false,
-        home: HomePage(userId: 1),
+        home: LoginPage(),
       );
   }
 }
